@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/acomma/admin/handler"
 	"github.com/go-sql-driver/mysql"
@@ -11,11 +12,11 @@ import (
 
 func main() {
 	config := mysql.NewConfig()
-	config.User = "root"
-	config.Passwd = "123456"
+	config.User = GetEnv("MYSQL_USER", "root")
+	config.Passwd = GetEnv("MYSQL_PASSWD", "123456")
 	config.Net = "tcp"
-	config.Addr = "127.0.0.1:3306"
-	config.DBName = "admin-go"
+	config.Addr = GetEnv("MYSQL_ADDR", "127.0.0.1:3306")
+	config.DBName = GetEnv("MYSQL_DBNAME", "admin-go")
 
 	database, err := sql.Open("mysql", config.FormatDSN())
 	if err != nil {
@@ -32,4 +33,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("启动服务失败：%v\n", err)
 	}
+}
+
+func GetEnv(key string, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
 }
